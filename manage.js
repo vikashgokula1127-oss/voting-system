@@ -1,0 +1,8 @@
+import {auth,db} from "./firebase-config.js";
+import {onAuthStateChanged} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import {doc,getDoc,collection,addDoc,getDocs,serverTimestamp} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+const id=new URLSearchParams(location.search).get("id"),app=document.getElementById("app");let uid;
+onAuthStateChanged(auth,async u=>{if(!u){location.href="login.html";return}uid=u.uid;const e=await getDoc(doc(db,"elections",id));if(!e.exists()||e.data().hostId!==uid){location.href="host.html";return}render(e.data())});
+function render(e){app.innerHTML=`<div class=card><h2>Manage: ${esc(e.title)}</h2><input id=n placeholder="Candidate name"><textarea id=d placeholder="Candidate description"></textarea><button id=add class=btn>Add Candidate</button><p id=m></p></div><div id=list></div>`;document.getElementById("add").onclick=async()=>{const n=document.getElementById("n").value.trim(),d=document.getElementById("d").value.trim();if(!n)return;await addDoc(collection(db,"elections",id,"candidates"),{name:n,description:d,votes:0,createdAt:serverTimestamp()});document.getElementById("m").textContent="Candidate added.";load()};load()}
+async function load(){const l=document.getElementById("list");l.innerHTML="";const s=await getDocs(collection(db,"elections",id,"candidates"));s.forEach(x=>l.innerHTML+=`<div class=card><b>${esc(x.data().name)}</b><p>${esc(x.data().description||"")}</p></div>`)}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
