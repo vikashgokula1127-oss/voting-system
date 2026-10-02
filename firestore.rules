@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isHost() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "host";
+    }
+    function isSelf(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow create: if isSelf(uid);
+      allow read: if isSelf(uid) || isHost();
+      allow update, delete: if false;
+    }
+
+    match /elections/{eid} {
+      allow read: if signedIn();
+      allow create: if isHost() && request.resource.data.hostId == request.auth.uid;
+      allow update: if isHost() && resource.data.hostId == request.auth.uid;
+      allow delete: if false;
+
+      match /candidates/{cid} {
+        allow read: if signedIn();
+        allow create: if isHost() &&
+          get(/databases/$(database)/documents/elections/$(eid)).data.hostId == request.auth.uid;
+        allow update: if isHost() &&
+          get(/databases/$(database)/documents/elections/$(eid)).data.hostId == request.auth.uid;
+        allow delete: if false;
+      }
+
+      match /votes/{vid} {
+        allow read: if isHost() ||
+          (signedIn() && request.auth.uid == vid);
+        allow create: if signedIn() &&
+          request.auth.uid == vid &&
+          request.resource.data.voterId == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+  }
+}
