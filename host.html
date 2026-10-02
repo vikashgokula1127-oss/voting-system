@@ -1,0 +1,5 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Host Dashboard</title><link rel="stylesheet" href="css/style.css"></head>
+<body><nav><b>Host Dashboard</b><button id="logout" class="linkbtn">Logout</button></nav><main>
+<div class="card"><h2>Create Election</h2><input id="title" placeholder="Election/Event title"><textarea id="description" placeholder="Description"></textarea><label>Start time</label><input id="startAt" type="datetime-local"><label>End time</label><input id="endAt" type="datetime-local"><button id="createEvent" class="btn">Create Election</button><p id="msg"></p></div>
+<h2>Your Elections</h2><div id="events" class="grid"></div>
+</main><script type="module" src="js/host.js"></script></body></html>
